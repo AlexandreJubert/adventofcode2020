@@ -1,4 +1,4 @@
-use std::{env, fmt::Debug, fs, str::FromStr};
+use std::{ fmt::Debug, fs, str::FromStr};
 
 fn parse_list_from_file<T: FromStr + Debug>(input_path: &'static str, separator: char) -> Vec<T> {
     // first open file
@@ -15,7 +15,7 @@ fn parse_list_from_file<T: FromStr + Debug>(input_path: &'static str, separator:
     element_list
 }
 
-fn day_01_part1(input_path: &'static str) {
+fn day_01_part1(input_path: &'static str) -> Result<u32, &'static str> {
     let number_list: Vec<u32> = parse_list_from_file(input_path, '\n');
     for (number1_index, number1) in number_list.iter().enumerate() {
         for (number2_index, number2) in number_list.iter().enumerate() {
@@ -25,13 +25,14 @@ fn day_01_part1(input_path: &'static str) {
             }
             if number1 + number2 == 2020 {
                 println!("Day 01 part 1 result: {}", number1 * number2);
-                return;
+                return Ok(number1 * number2)
             }
         }
     }
+    return Err("Failed to find number");
 }
 
-fn day_01_part2(input_path: &'static str) {
+fn day_01_part2(input_path: &'static str) -> Result<u32, &'static str> {
     let number_list: Vec<u32> = parse_list_from_file(input_path, '\n');
 
     // now we'll iterate the list twice
@@ -50,24 +51,29 @@ fn day_01_part2(input_path: &'static str) {
 
                 if number1 + number2 + number3 == 2020 {
                     println!("Day 01 part 2 result: {}", number1 * number2 * number3);
-                    return;
+                    return Ok(number1 * number2 * number3);
                 }
             }
         }
     }
+    return Err("Failed to find number");
 }
 
 fn main() {
-    // take first argument to path
-    let args: Vec<String> = env::args().collect();
-    if args.len() <= 1 {
-        return;
+    println!("Day 1 Part 1 result {}", day_01_part1("input_01.txt").unwrap());
+    println!("Day 1 Part 2 result {}", day_01_part2("input_01.txt").unwrap());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn day_01_part1_test() {
+        assert_eq!(day_01_part1("input_01.txt"), Ok(567171));
     }
 
-    let input_file_path: &String = &args[1];
-
-    println!("Opening file {}", input_file_path);
-
-    day_01_part1("input_01.txt");
-    day_01_part2("input_01.txt");
+    #[test]
+    fn day_02_part2_test() {
+        assert_eq!(day_01_part2("input_01.txt"), Ok(212428694));
+    }
 }
