@@ -15,7 +15,7 @@ fn parse_list_from_file<T: FromStr + Debug>(input_path: &'static str, separator:
     element_list
 }
 
-fn day_01_part1(input_path: &'static str) -> Result<u32, &'static str> {
+fn day_01_part_01(input_path: &'static str) -> Result<u32, &'static str> {
     let number_list: Vec<u32> = parse_list_from_file(input_path, '\n');
     for (number1_index, number1) in number_list.iter().enumerate() {
         for (number2_index, number2) in number_list.iter().enumerate() {
@@ -32,7 +32,7 @@ fn day_01_part1(input_path: &'static str) -> Result<u32, &'static str> {
     return Err("Failed to find number");
 }
 
-fn day_01_part2(input_path: &'static str) -> Result<u32, &'static str> {
+fn day_01_part_02(input_path: &'static str) -> Result<u32, &'static str> {
     let number_list: Vec<u32> = parse_list_from_file(input_path, '\n');
 
     // now we'll iterate the list twice
@@ -111,7 +111,7 @@ fn parse_password_entries(input_path: &'static str) -> Vec<PasswordEntry> {
     password_entries
 }
 
-fn day_02_part1(password_entries: &Vec<PasswordEntry>) -> u32 {
+fn day_02_part_01(password_entries: &Vec<PasswordEntry>) -> u32 {
     // now we can just validate each password
     let mut valid_password_count: u32 = 0;
     for password in password_entries {
@@ -124,22 +124,30 @@ fn day_02_part1(password_entries: &Vec<PasswordEntry>) -> u32 {
     valid_password_count
 }
 
-fn day_02_part2(password_entries: &Vec<PasswordEntry>) -> u32 {
+fn day_02_part_02(password_entries: &Vec<PasswordEntry>) -> u32 {
     // now we can just validate each password
     let mut valid_password_count: u32 = 0;
     for password_entry in password_entries {
         let mut char_entry_count = 0u32;
-        if password_entry.min_occurence <= password_entry.password.len()
-        {
-            if(password_entry.password.chars().nth(password_entry.min_occurence - 1)).unwrap() == password_entry.character
+        if password_entry.min_occurence <= password_entry.password.len() {
+            if (password_entry
+                .password
+                .chars()
+                .nth(password_entry.min_occurence - 1))
+            .unwrap()
+                == password_entry.character
             {
                 char_entry_count += 1;
             }
         }
 
-        if password_entry.max_occurence <= password_entry.password.len()
-        {
-            if(password_entry.password.chars().nth(password_entry.max_occurence - 1)).unwrap() == password_entry.character
+        if password_entry.max_occurence <= password_entry.password.len() {
+            if (password_entry
+                .password
+                .chars()
+                .nth(password_entry.max_occurence - 1))
+            .unwrap()
+                == password_entry.character
             {
                 char_entry_count += 1;
             }
@@ -152,26 +160,87 @@ fn day_02_part2(password_entries: &Vec<PasswordEntry>) -> u32 {
     valid_password_count
 }
 
+#[derive(Debug, std::cmp::PartialEq)]
+enum MapElement {
+    Empty,
+    Tree,
+}
+struct Slope(usize, usize);
+
+fn parse_tree_map(input_path: &'static str) -> Vec<Vec<MapElement>> {
+    let file_content = fs::read_to_string(input_path)
+        .expect(format!("Failed to read file {}", input_path).as_str());
+
+    let mut map: Vec<Vec<MapElement>> = Vec::new();
+    for line in file_content.split('\n') {
+        if line.is_empty() {
+            continue;
+        } // skip empty lines
+        let mut current_row: Vec<MapElement> = Vec::new();
+        for character in line.chars() {
+            match character {
+                '.' => current_row.push(MapElement::Empty),
+                '#' => current_row.push(MapElement::Tree),
+                _ => {}
+            }
+        }
+        map.push(current_row);
+    }
+    map
+}
+
+fn day_03(map: &Vec<Vec<MapElement>>, slope: &Slope) -> u32 {
+    // now we can iterate in our map
+    // first lets get the map dimensions
+    if map.is_empty() || map[0].is_empty() {
+        return 0;
+    }
+
+    let width = map[0].len();
+    let mut current_column: usize = 0;
+    let mut total_tree_count = 0;
+    for current_row in map.iter().step_by(slope.1 as usize) {
+        if current_row[current_column % width] == MapElement::Tree {
+            total_tree_count += 1;
+        }
+        current_column += slope.0; // we increment according to our slope parameter, which is one down 3 right
+    }
+    total_tree_count
+}
+
 fn main() {
-    let password_entries = parse_password_entries("inputs/input_02.txt");
-    println!("Day 2 Part 2 result {}", day_02_part2(&password_entries));
+    let slope_list = vec![
+        Slope(1, 1),
+        Slope(3, 1),
+        Slope(5, 1),
+        Slope(7, 1),
+        Slope(1, 2),
+    ];
+    let map = parse_tree_map("inputs/input_03.txt");
+
+    let mut total_trees = 1;
+    for slope in slope_list {
+        let result = day_03(&map, &slope);
+        total_trees *= result;
+    }
+    println!("{}", total_trees);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
-    fn day_01_part1_test() {
-        assert_eq!(day_01_part1("inputs/input_01.txt"), Ok(567171));
+    fn day_01_part_01_test() {
+        assert_eq!(day_01_part_01("inputs/input_01.txt"), Ok(567171));
     }
 
     #[test]
-    fn day_01_part2_test() {
-        assert_eq!(day_01_part2("inputs/input_01.txt"), Ok(212428694));
+    fn day_01_part_02_test() {
+        assert_eq!(day_01_part_02("inputs/input_01.txt"), Ok(212428694));
     }
 
     #[test]
-    fn day_02_part1_test() {
+    fn day_02_part_01_test() {
         let password_entries = vec![
             PasswordEntry {
                 min_occurence: 1,
@@ -192,14 +261,14 @@ mod tests {
                 password: "ccccccccc".to_string(),
             },
         ];
-        assert_eq!(day_02_part1(&password_entries), 2);
+        assert_eq!(day_02_part_01(&password_entries), 2);
 
         let password_entries = parse_password_entries("inputs/input_02.txt");
-        assert_eq!(day_02_part1(&password_entries), 410);
+        assert_eq!(day_02_part_01(&password_entries), 410);
     }
 
     #[test]
-    fn day_02_part2_test() {
+    fn day_02_part_02_test() {
         let password_entries = vec![
             PasswordEntry {
                 min_occurence: 1,
@@ -220,9 +289,50 @@ mod tests {
                 password: "ccccccccc".to_string(),
             },
         ];
-        assert_eq!(day_02_part2(&password_entries), 1);
+        assert_eq!(day_02_part_02(&password_entries), 1);
 
         let password_entries = parse_password_entries("inputs/input_02.txt");
-        assert_eq!(day_02_part2(&password_entries), 694);
+        assert_eq!(day_02_part_02(&password_entries), 694);
+    }
+
+    #[test]
+    fn day_03_part_01_test() {
+        {
+            let map = parse_tree_map("inputs/input_03_example.txt");
+            assert_eq!(day_03(&map, &Slope(3, 1)), 7);
+        }
+        {
+            let map = parse_tree_map("inputs/input_03.txt");
+            assert_eq!(day_03(&map, &Slope(3, 1)), 211);
+        }
+    }
+
+    #[test]
+    fn day_03_part_02_test() {
+        let slope_list = vec![
+            Slope(1, 1),
+            Slope(3, 1),
+            Slope(5, 1),
+            Slope(7, 1),
+            Slope(1, 2),
+        ];
+
+        {
+            let map = parse_tree_map("inputs/input_03_example.txt");
+            let mut total_trees = 1;
+            for slope in &slope_list {
+                total_trees *= day_03(&map, &slope);
+            }
+            assert_eq!(total_trees, 336);
+        }
+
+        {
+            let map = parse_tree_map("inputs/input_03.txt");
+            let mut total_trees = 1;
+            for slope in &slope_list {
+                total_trees *= day_03(&map, &slope);
+            }
+            assert_eq!(total_trees, 3584591857);
+        }
     }
 }
