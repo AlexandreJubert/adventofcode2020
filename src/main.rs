@@ -223,6 +223,6 @@ mod tests {
         assert_eq!(day_02_part2(&password_entries), 1);
 
         let password_entries = parse_password_entries("inputs/input_02.txt");
-        assert_eq!(day_02_part1(&password_entries), 390);
+        assert_eq!(day_02_part2(&password_entries), 694);
     }
 }
