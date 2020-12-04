@@ -208,22 +208,140 @@ fn day_03(map: &Vec<Vec<MapElement>>, slope: &Slope) -> u32 {
     total_tree_count
 }
 
-fn main() {
-    let slope_list = vec![
-        Slope(1, 1),
-        Slope(3, 1),
-        Slope(5, 1),
-        Slope(7, 1),
-        Slope(1, 2),
-    ];
-    let map = parse_tree_map("inputs/input_03.txt");
+#[derive(Debug)]
 
-    let mut total_trees = 1;
-    for slope in slope_list {
-        let result = day_03(&map, &slope);
-        total_trees *= result;
+enum Height {
+    Inch(u32),
+    Cm(u32),
+}
+
+#[derive(Debug)]
+enum EyeColor {
+    Amb,
+    Blu,
+    Brn,
+    Gry,
+    Grn,
+    Hzl,
+    Oth,
+}
+
+#[derive(Debug)]
+struct PassportEntry {
+    byr: Option<u32>,      // (Birth Year)
+    iyr: Option<u32>,      // (Issue Year)
+    eyr: Option<u32>,      // (Expiration Year)
+    hgt: Option<Height>,   // (Height)
+    hcl: Option<String>,   // (Hair Color)
+    ecl: Option<EyeColor>, // (Eye Color)
+    pid: Option<String>,   // (Passport ID)
+    cid: Option<String>,   // (Country ID)
+}
+
+impl PassportEntry {
+    fn new() -> PassportEntry {
+        PassportEntry {
+            byr: None,
+            iyr: None,
+            eyr: None,
+            hgt: None,
+            hcl: None,
+            ecl: None,
+            pid: None,
+            cid: None,
+        }
     }
-    println!("{}", total_trees);
+
+    fn is_valid(&self) -> bool {
+        let mut is_valid = true;
+        is_valid &= match self.byr {
+            Some(byr) => byr >= 1920 && byr <= 2002,
+            None => false,
+        };
+
+        is_valid &= match self.iyr {
+            Some(iyr) => iyr >= 2010 && iyr <= 2020,
+            None => false,
+        };
+
+        is_valid &= match self.eyr {
+            Some(eyr) => eyr >= 2020 && eyr <= 2030,
+            None => false,
+        };
+
+        is_valid &= match self.hgt {
+            Some(hgt) => match hgt {
+                Height::Inch(value) => value >= 59 && value <= 76,
+                Height::Cm(value) => value >= 150 && value <= 193,
+            },
+            None => false,
+        };
+
+        is_valid &= self.hcl.is_some();
+        is_valid &= self.ecl.is_some();
+        is_valid &= self.pid.is_some();
+
+        is_valid
+    }
+}
+
+fn parse_passport_list(input_path: &'static str) -> Vec<PassportEntry> {
+    let file_content = fs::read_to_string(input_path)
+        .expect(format!("Failed to read file {}", input_path).as_str());
+
+    let mut passports: Vec<PassportEntry> = Vec::new();
+
+    // split by new line
+    for text_passport_entry in file_content.split("\r\n\r\n") {
+        let mut passport_entry = PassportEntry::new();
+        for passport_line_entry in text_passport_entry.split('\n') {
+            for data_entry in passport_line_entry.split(' ') {
+                // and finally we split to a key/value pair
+                let key_value: Vec<&str> = data_entry.split(':').collect();
+                if key_value.len() != 2 {
+                    continue; // we skip entries that don't have the right format
+                }
+                match key_value[0] {
+                    "byr" => passport_entry.byr = Some(key_value[1].parse::<u32>().unwrap()),
+                    "iyr" => passport_entry.iyr = Some(key_value[1].parse::<u32>().unwrap()),
+                    "eyr" => passport_entry.eyr = Some(key_value[1].parse::<u32>().unwrap()),
+                    "hgt" => {
+                        passport_entry.hgt = {
+                            match &key_value[1][key_value.len() - 2..key_value.len()] {
+                                "cm" => Some(Height::Cm(
+                                    key_value[0..key_value.len() - 2].parse::<u32>().unwrap(),
+                                )),
+                                "in" => None,
+                                _ => None,
+                            }
+                        }
+                    }
+                    "hcl" => passport_entry.hcl = Some(key_value[1].to_string()),
+                    //"ecl" => passport_entry.ecl = Some(key_value[1].to_string()),
+                    "pid" => passport_entry.pid = Some(key_value[1].to_string()),
+                    "cid" => passport_entry.cid = Some(key_value[1].to_string()),
+                    _ => {}
+                }
+            }
+        }
+        passports.push(passport_entry);
+    }
+    passports
+}
+
+fn day_04(passport_list: &Vec<PassportEntry>) -> u32 {
+    let mut valid_passport = 0u32;
+    for passport in passport_list {
+        if passport.is_valid() {
+            valid_passport += 1;
+        }
+    }
+    valid_passport
+}
+
+fn main() {
+    let passports = parse_passport_list("inputs/input_04.txt");
+    println!("{}", day_04(&passports));
 }
 
 #[cfg(test)]
@@ -334,5 +452,14 @@ mod tests {
             }
             assert_eq!(total_trees, 3584591857);
         }
+    }
+
+    #[test]
+    fn day_04_part_01_test() {
+        let passports = parse_passport_list("inputs/input_04_example.txt");
+        assert_eq!(day_04(&passports), 2);
+
+        let passports = parse_passport_list("inputs/input_04.txt");
+        assert_eq!(day_04(&passports), 2);
     }
 }
