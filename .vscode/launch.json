@@ -9,11 +9,14 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/adventofcode2020.exe",
-            "args": ["input_01.txt"],
+            "args": [
+                "input_01.txt"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": false
+            "externalConsole": false,
+            "symbolSearchPath": "https://msdl.microsoft.com/download/symbols"
         }
     ]
 }
