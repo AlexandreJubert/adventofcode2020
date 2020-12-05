@@ -11,8 +11,8 @@ pub enum Position {
 #[derive(Debug)]
 pub struct SeatTicket(pub Vec<Position>);
 
-const PLANE_ROW_COUNT: usize = 128;
-const PLANE_COLUMN_COUNT: usize = 8;
+pub const PLANE_ROW_COUNT: usize = 128;
+pub const PLANE_COLUMN_COUNT: usize = 8;
 
 impl SeatTicket {
     pub fn get_seat_position(&self) -> (usize, usize) {
@@ -91,7 +91,7 @@ mod tests {
         assert_eq!(seat.get_seat_position(), (44, 5));
         assert_eq!(seat.get_seat_id(), 357);
 
-        let seats = parse_seats_from_file("inputs/input_05_example.txt");
+        let seats = parse_seats_from_file("inputs/input_05.txt");
         let mut highest_seat = 0usize;
         for seat in seats {
             highest_seat = cmp::max(highest_seat, seat.get_seat_id());
@@ -99,6 +99,4 @@ mod tests {
 
         assert_eq!(highest_seat, 890);
     }
-
-    fn part_02() {}
 }
