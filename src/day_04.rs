@@ -201,6 +201,7 @@ mod tests {
     #[test]
     fn part_01() {
         let passports = parse_passport_list("inputs/input_04_example.txt");
+        println!("{:#?}", passports);
         assert_eq!(day_04(&passports, false), 2);
 
         let passports = parse_passport_list("inputs/input_04.txt");
@@ -210,6 +211,7 @@ mod tests {
     #[test]
     fn part_02() {
         let passports = parse_passport_list("inputs/input_04.txt");
+        println!("{:#?}", passports);
         assert_eq!(day_04(&passports, true), 184);
     }
 }
