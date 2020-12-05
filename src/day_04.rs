@@ -123,6 +123,11 @@ impl PassportEntry {
     }
 }
 
+#[cfg(windows)]
+const LINE_ENDING: &'static str = "\r\n\r\n";
+#[cfg(not(windows))]
+const LINE_ENDING: &'static str = "\n\n";
+
 pub fn parse_passport_list(input_path: &'static str) -> Vec<PassportEntry> {
     let file_content = fs::read_to_string(input_path).unwrap_or_else(|_| {
         eprintln!("Failed to read file {}", input_path);
@@ -132,7 +137,7 @@ pub fn parse_passport_list(input_path: &'static str) -> Vec<PassportEntry> {
     let mut passports: Vec<PassportEntry> = Vec::new();
 
     // split by new line
-    for text_passport_entry in file_content.split("\r\n\r\n") {
+    for text_passport_entry in file_content.split(LINE_ENDING) {
         let mut passport_entry = PassportEntry::new();
         for passport_line_entry in text_passport_entry.split('\n') {
             for data_entry in passport_line_entry.split(' ') {
