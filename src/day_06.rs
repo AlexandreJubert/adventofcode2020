@@ -4,11 +4,27 @@ use std::collections::HashSet;
 pub struct Group(Vec<String>);
 
 impl Group {
-    pub fn get_answers_count(&self) -> usize {
+    pub fn get_unique_answers_count(&self) -> usize {
         // need unique list of characters
         let mut unique: HashSet<char> = HashSet::new();
         for person in &self.0 {
             for character in person.chars() {
+                unique.insert(character);
+            }
+        }
+        unique.len()
+    }
+
+    pub fn get_same_answers_count(&self) -> usize {
+        // we need to iterate over every characters
+        let matching_string = "abcdefghijklmnopqrstuvwxyz";
+        let mut unique: HashSet<char> = HashSet::new();
+        for character in matching_string.chars() {
+            let mut is_not_in_all_person_answers = false;
+            for person in &self.0 {
+                is_not_in_all_person_answers |= person.find(character).is_none();
+            }
+            if !is_not_in_all_person_answers {
                 unique.insert(character);
             }
         }
@@ -55,7 +71,7 @@ mod tests {
         ])];
 
         assert_eq!(read_answers_from_string(&test_string), answer);
-        assert_eq!(answer[0].get_answers_count(), 6);
+        assert_eq!(answer[0].get_unique_answers_count(), 6);
     }
     #[test]
     fn part_01() {
@@ -63,8 +79,19 @@ mod tests {
         let groups = read_answers_from_string(&input_file);
         let mut sum = 0;
         for group in groups {
-            sum += group.get_answers_count();
+            sum += group.get_unique_answers_count();
         }
         assert_eq!(sum, 6504);
+    }
+
+    #[test]
+    fn part_02() {
+        let input_file = utils::read_file_to_string("inputs/input_06.txt");
+        let groups = read_answers_from_string(&input_file);
+        let mut sum = 0;
+        for group in groups {
+            sum += group.get_same_answers_count();
+        }
+        assert_eq!(sum, 3351);
     }
 }

@@ -11,7 +11,7 @@ fn main() {
     let groups = day_06::read_answers_from_string(&input_file);
     let mut sum = 0;
     for group in groups {
-        sum += group.get_answers_count();
+        sum += group.get_same_answers_count();
     }
     println!("{}", sum);
 }
