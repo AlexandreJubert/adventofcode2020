@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use crate::utils::DOUBLE_LINE_ENDING;
+
 #[derive(Debug, PartialEq)]
 pub struct Group(Vec<String>);
 
@@ -39,7 +41,7 @@ pub fn read_answers_from_string(input: &str) -> Vec<Group> {
 
     // first split by new lines
     let mut groups: Vec<Group> = Vec::new();
-    for group in input.split("\n\n") {
+    for group in input.split(DOUBLE_LINE_ENDING) {
         if group.is_empty() {
             continue;
         }
