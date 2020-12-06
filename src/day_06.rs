@@ -1,9 +1,20 @@
-use std::fs;
-
-use crate::utils;
+use std::collections::HashSet;
 
 #[derive(Debug, PartialEq)]
 pub struct Group(Vec<String>);
+
+impl Group {
+    pub fn get_answers_count(&self) -> usize {
+        // need unique list of characters
+        let mut unique: HashSet<char> = HashSet::new();
+        for person in &self.0 {
+            for character in person.chars() {
+                unique.insert(character);
+            }
+        }
+        unique.len()
+    }
+}
 
 pub fn read_answers_from_string(input: &str) -> Vec<Group> {
     if input.is_empty() {
@@ -13,14 +24,12 @@ pub fn read_answers_from_string(input: &str) -> Vec<Group> {
     // first split by new lines
     let mut groups: Vec<Group> = Vec::new();
     for group in input.split("\n\n") {
-        println!("Group {:#?}", group);
         if group.is_empty() {
             continue;
         }
         // let's split by person
         let mut persons: Vec<String> = Vec::new();
         for person in group.split('\n') {
-            println!("Person {:#?}", person);
             if person.is_empty() {
                 continue;
             }
@@ -32,6 +41,8 @@ pub fn read_answers_from_string(input: &str) -> Vec<Group> {
 }
 #[cfg(test)]
 mod tests {
+    use crate::utils;
+
     use super::*;
 
     #[test]
@@ -44,7 +55,16 @@ mod tests {
         ])];
 
         assert_eq!(read_answers_from_string(&test_string), answer);
+        assert_eq!(answer[0].get_answers_count(), 6);
     }
     #[test]
-    fn part_01() {}
+    fn part_01() {
+        let input_file = utils::read_file_to_string("inputs/input_06.txt");
+        let groups = read_answers_from_string(&input_file);
+        let mut sum = 0;
+        for group in groups {
+            sum += group.get_answers_count();
+        }
+        assert_eq!(sum, 6504);
+    }
 }

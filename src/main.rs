@@ -9,5 +9,9 @@ mod utils;
 fn main() {
     let input_file = utils::read_file_to_string("inputs/input_06.txt");
     let groups = day_06::read_answers_from_string(&input_file);
-    println!("{:#?}", groups);
+    let mut sum = 0;
+    for group in groups {
+        sum += group.get_answers_count();
+    }
+    println!("{}", sum);
 }
